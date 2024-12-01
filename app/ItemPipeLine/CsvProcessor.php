@@ -34,6 +34,10 @@ class CsvProcessor implements ItemProcessorInterface
         DB::table('scraping_data')->insert([
             'title' => $data['title'],
             'price' => str_replace('£','',$data['price']),
+            'description' => $data['description'],
+            //'upc' => $data['upc'],
+            'link' => $data['url'],
+            'availability' => $data['availability'],
             'image' => $data['image'],
             'created_at' => now(),
             'updated_at' => now(),

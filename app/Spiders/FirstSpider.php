@@ -55,20 +55,22 @@ class FirstSpider extends BasicSpider
             ->each(fn(Crawler $node) => [
                 "title" => $node->filter(".image_container img")->attr('alt'),
                 "price" => $node->filter(".price_color")->text(),
-                //"url" => $node->filter("a")->link()->getUri(),
+                "url" => $node->filter("a")->link()->getUri(),
                 "image" => $node->filter(".thumbnail")->attr("src"),
             ]);
+
+
 
             try {
                 $nextPageUrl = $response->filter('.next > a')->link()->getUri();
                 yield $this->request('GET', $nextPageUrl);
             } catch (Exception) {
             }
-        
+
 
         // pass the extracted content to an item pipeline
         foreach ($items as $item) {
-          yield $this->item($item);
+          yield $this->request('GET', $item['url'], 'parseBookPage', ['item' => $item]);
         }
         /*
         // find the next page URL and make a request
@@ -81,4 +83,25 @@ class FirstSpider extends BasicSpider
         }
             */
     }
+
+/**
+ * Parses the book page and returns a generator of items.
+ */
+  public function parseBookPage(Response $response): Generator {
+    $item = $response->getRequest()->getOptions()['item'];
+
+    $descriptionArray = $response
+        ->filter('.product_page > p')
+        ->each(fn(Crawler $node) => $node->text());
+
+    $item['description'] = implode("\n", $descriptionArray);
+
+    $avail = $response->filter('.instock.availability')->text();
+    preg_match('/\d+/', $avail,$arr);
+
+    $item['availability'] = implode('', $arr);
+    //$item['upc'] = $response->filter('span[itemprop="datePublished"]')->innerText();
+    //dd($item);
+    yield $this->item($item);
+}
 }

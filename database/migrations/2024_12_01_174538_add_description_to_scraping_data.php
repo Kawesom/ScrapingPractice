@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('scraping_data', function (Blueprint $table) {
-            $table->id();
-            $table->string('title');
-            $table->double('price');
-            $table->string('image');
-            $table->timestamps();
+        Schema::table('scraping_data', function (Blueprint $table) {
+            $table->text('description')->nullable();
+            $table->string('upc')->nullable();
+            $table->string('availability')->nullable();
+            $table->string('link');
         });
     }
 
@@ -25,6 +24,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('scraping_data');
+        Schema::table('scraping_data', function (Blueprint $table) {
+            //
+        });
     }
 };
